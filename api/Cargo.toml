@@ -1,0 +1,17 @@
+[package]
+name = "api"
+authors = ["Ezeabasili, Anthony Etienne <anthony.ezeabasili@jenoptik.com>"]
+description = ""
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+anyhow = "1"
+spin-sdk = "3.0.1"
+serde = { version = "1.0.163", features = ["derive"] }
+serde_json = "1.0"
+
+[workspace]

@@ -1,0 +1,87 @@
+spin_manifest_version = 2
+
+[application]
+name = "venvai-serverless"
+version = "0.1.0"
+authors = ["Ezeabasili, Anthony Etienne <ezeabasilianthony@gmail.com>"]
+description = ""
+
+# scheduler
+[[trigger.http]]
+route = "/schedule"
+component = "scheduler"
+
+[component.scheduler]
+source = "scheduler/target/wasm32-wasi/release/scheduler.wasm"
+allowed_outbound_hosts = []
+[component.scheduler.build]
+command = "cargo build --target wasm32-wasi --release"
+workdir = "scheduler"
+watch = ["src/**/*.rs", "Cargo.toml"]
+
+# http endpoint
+[[trigger.http]]
+route = "/api/..."
+component = "api"
+
+[component.api]
+key_value_stores = ["default"]
+sqlite_databases = ["default"]
+source = "api/target/wasm32-wasi/release/api.wasm"
+ai_models = ["llama2-chat"]
+allowed_outbound_hosts = []
+[component.api.build]
+command = "cargo build --target wasm32-wasi --release"
+workdir = "api"
+watch = ["src/**/*.rs", "Cargo.toml"]
+
+# static server
+[[trigger.http]]
+route = "/static/..."
+component = "assets"
+
+[component.assets]
+source = { url = "https://github.com/fermyon/spin-fileserver/releases/download/v0.2.1/spin_static_fs.wasm", digest = "sha256:5f05b15f0f7cd353d390bc5ebffec7fe25c6a6d7a05b9366c86dcb1a346e9f0f" }
+files = [{ source = "assets", destination = "/" }]
+
+# redirect static server
+# [[trigger.http]]
+# route = "/static/a.jpg"
+# component = "additional-assets-redirect"
+
+# [component.additional-assets-redirect]
+# source = { url = "https://github.com/fermyon/spin-redirect/releases/download/v0.1.0/redirect.wasm", digest = "sha256:8bee959843f28fef2a02164f5840477db81d350877e1c22cb524f41363468e52" }
+# environment = { DESTINATION = "/static/b.jpg" }
+
+# cron app
+[[trigger.cron]]
+component = "cron-app"
+cron_expression = "1/30 * * * * *"
+
+[component.cron-app]
+source = "cron-app/target/wasm32-wasi/release/cron_app.wasm"
+allowed_outbound_hosts = []
+[component.cron-app.build]
+command = "cargo build --target wasm32-wasi --release"
+workdir = "cron-app"
+watch = ["src/**/*.rs", "Cargo.toml"]
+
+## drag n drop
+[[trigger.http]]
+route = "/drag/..."
+component = "drag-n-drop"
+
+[component.drag-n-drop]
+source = { url = "https://github.com/fermyon/spin-fileserver/releases/download/v0.2.1/spin_static_fs.wasm", digest = "sha256:5f05b15f0f7cd353d390bc5ebffec7fe25c6a6d7a05b9366c86dcb1a346e9f0f" }
+files = [{ source = "drag-n-drop", destination = "/" }]
+
+
+###
+[variables]
+api_token = { required = true}
+api_uri = { default = "http://my-api.com" }
+
+[component.api.variables]
+token = "{{ api_token }}"
+api_uri = "{{ api_uri }}"
+version = "v1"

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            .draggable {
+                width: 150px;
+                height: 100px;
+                border: 1px solid #000;
+                border-radius: 5px;
+                background-color: #f9f9f9;
+                position: absolute;
+                cursor: move;
+            }
+            .title {
+                font-weight: bold;
+                text-align: center;
+                margin: 10px 0;
+            }
+            .port {
+                width: 10px;
+                height: 10px;
+                background-color: red;
+                border-radius: 50%;
+                position: absolute;
+            }
+            .port.input {
+                left: -5px;
+                top: 50%;
+                transform: translate(-50%, -50%);
+            }
+            .port.output {
+                right: -5px;
+                top: 50%;
+                transform: translate(50%, -50%);
+            }
+        </style>
+    </head>
+    <body>
+        <div id="menu1" class="draggable" style="top: 50px; left: 50px">
+            <div class="title">Menu 1</div>
+            <div class="port input"></div>
+            <div class="port output"></div>
+        </div>
+        <div id="menu2" class="draggable" style="top: 200px; left: 300px">
+            <div class="title">Menu 2</div>
+            <div class="port input"></div>
+            <div class="port output"></div>
+        </div>
+        <div id="menu3" class="draggable" style="top: 200px; left: 300px">
+            <div class="title">Menu 3</div>
+            <div class="port input"></div>
+            <div class="port output"></div>
+        </div>
+        <svg id="svg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none">
+            <path id="path" stroke="black" stroke-width="2" fill="none"></path>
+        </svg>
+
+        <svg id="svg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none">
+            <path id="path" stroke="black" stroke-width="2" fill="none"></path>
+        </svg>
+
+        <script>
+            // Make elements draggable
+            function makeDraggable(element) {
+                element.onmousedown = function (event) {
+                    let shiftX = event.clientX - element.getBoundingClientRect().left;
+                    let shiftY = event.clientY - element.getBoundingClientRect().top;
+
+                    function moveAt(pageX, pageY) {
+                        element.style.left = pageX - shiftX + "px";
+                        element.style.top = pageY - shiftY + "px";
+                        updatePath();
+                    }
+
+                    function onMouseMove(event) {
+                        moveAt(event.pageX, event.pageY);
+                    }
+
+                    document.addEventListener("mousemove", onMouseMove);
+
+                    element.onmouseup = function () {
+                        document.removeEventListener("mousemove", onMouseMove);
+                        element.onmouseup = null;
+                    };
+
+                    element.ondragstart = function () {
+                        return false;
+                    };
+                };
+            }
+
+            function updatePath() {
+                const input1 = document.querySelector("#menu1 .port.input");
+                const output1 = document.querySelector("#menu1 .port.output");
+                const input2 = document.querySelector("#menu2 .port.input");
+                const output2 = document.querySelector("#menu2 .port.output");
+
+                const menu1Rect = document.getElementById("menu1").getBoundingClientRect();
+                const menu2Rect = document.getElementById("menu2").getBoundingClientRect();
+
+                const x1 = menu1Rect.left + input1.offsetLeft + input1.offsetWidth / 2;
+                const y1 = menu1Rect.top + input1.offsetTop + input1.offsetHeight / 2;
+                const x2 = menu2Rect.left + output2.offsetLeft + output2.offsetWidth / 2;
+                const y2 = menu2Rect.top + output2.offsetTop + output2.offsetHeight / 2;
+
+                const controlPointX1 = x1 + (x2 - x1) / 2;
+                const controlPointY1 = y1;
+                const controlPointX2 = x2 - (x2 - x1) / 2;
+                const controlPointY2 = y2;
+
+                const path = document.getElementById("path");
+                path.setAttribute(
+                    "d",
+                    `M ${x1} ${y1} C ${controlPointX1} ${controlPointY1}, ${controlPointX2} ${controlPointY2}, ${x2} ${y2}`
+                );
+            }
+
+            makeDraggable(document.getElementById("menu1"));
+            makeDraggable(document.getElementById("menu2"));
+            makeDraggable(document.getElementById("menu3"));
+
+            updatePath(); // Initial path update
+        </script>
+    </body>
+</html>

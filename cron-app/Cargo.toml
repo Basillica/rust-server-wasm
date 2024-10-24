@@ -1,0 +1,16 @@
+[package]
+name = "cron-app"
+authors = ["Ezeabasili, Anthony Etienne <anthony.ezeabasili@jenoptik.com>"]
+description = ""
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.71"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+spin-sdk = "3.0.1"
+spin-cron-sdk = { git = "https://github.com/fermyon/spin-trigger-cron/" }
+
+[workspace]
